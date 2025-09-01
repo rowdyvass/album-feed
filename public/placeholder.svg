@@ -1,0 +1,18 @@
+<svg width="300" height="300" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e293b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#475569;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="300" height="300" fill="url(#bg)"/>
+  
+  <!-- Music note icon -->
+  <text x="150" y="120" font-family="system-ui, -apple-system, sans-serif" font-size="48" fill="#f8fafc" text-anchor="middle">🎵</text>
+  
+  <!-- Album info placeholder -->
+  <text x="150" y="180" font-family="system-ui, -apple-system, sans-serif" font-size="16" fill="#cbd5e1" text-anchor="middle">Album Cover</text>
+  <text x="150" y="200" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#94a3b8" text-anchor="middle">Not Available</text>
+</svg>
