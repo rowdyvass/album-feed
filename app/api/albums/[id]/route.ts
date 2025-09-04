@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { musicBrainzService } from '@/lib/musicbrainz'
 import { criticalConsensusService } from '@/lib/critical-consensus-service'
 import { databaseService } from '@/lib/database'
+import { wikipediaService } from '@/lib/wikipedia'
 import type { AlbumDetail } from '@/types'
 
 export async function GET(
@@ -23,11 +24,24 @@ export async function GET(
         
         // Fetch additional details from MusicBrainz if needed
         let artist = null
+        let wikipediaUrl: string | undefined
+        let bioExcerpt = 'Artist information coming soon...'
         try {
           const release = await musicBrainzService.getRelease(id)
           const artistId = release['artist-credit']?.[0]?.artist?.id
           if (artistId) {
             artist = await musicBrainzService.getArtist(artistId)
+            wikipediaUrl = artist?.relations?.find((r: any) => r.type === 'wikipedia')?.url?.resource
+            if (wikipediaUrl) {
+              try {
+                const summary = await wikipediaService.getSummaryFromUrl(wikipediaUrl)
+                if (summary) bioExcerpt = summary
+              } catch (e) {
+                console.warn('Failed to fetch Wikipedia summary:', e)
+              }
+            } else if (artist?.tags) {
+              bioExcerpt = artist.tags.map((t: any) => t.name).join(', ')
+            }
           }
         } catch (error) {
           console.warn('Failed to fetch additional MusicBrainz data:', error)
@@ -125,8 +139,8 @@ export async function GET(
             id: artist?.id || '',
             name: artist?.name || album.artistCredit || '',
             wikidataId: undefined,
-            wikipediaUrl: artist?.id && artist.name ? `https://en.wikipedia.org/wiki/Special:Search/${encodeURIComponent(artist.name)}` : undefined,
-            bioExcerpt: artist?.tags?.map(tag => tag.name).join(', ') || 'Artist information coming soon...',
+            wikipediaUrl: wikipediaUrl || (artist?.id && artist.name ? `https://en.wikipedia.org/wiki/Special:Search/${encodeURIComponent(artist.name)}` : undefined),
+            bioExcerpt,
             relatedArtistIds: [],
             previousReleases: []
           },
@@ -149,8 +163,21 @@ export async function GET(
       // Fetch artist information
       const artistId = release['artist-credit']?.[0]?.artist?.id
       let artist = null
+      let wikipediaUrl: string | undefined
+      let bioExcerpt = 'Artist information coming soon...'
       if (artistId) {
         artist = await musicBrainzService.getArtist(artistId)
+        wikipediaUrl = artist?.relations?.find((r: any) => r.type === 'wikipedia')?.url?.resource
+        if (wikipediaUrl) {
+          try {
+            const summary = await wikipediaService.getSummaryFromUrl(wikipediaUrl)
+            if (summary) bioExcerpt = summary
+          } catch (e) {
+            console.warn('Failed to fetch Wikipedia summary:', e)
+          }
+        } else if (artist?.tags) {
+          bioExcerpt = artist.tags.map((t: any) => t.name).join(', ')
+        }
       }
 
       // Create mock streaming and purchase links
@@ -244,8 +271,8 @@ export async function GET(
           id: artist?.id || '',
           name: artist?.name || album.artistCredit,
           wikidataId: undefined,
-          wikipediaUrl: artist?.id && artist.name ? `https://en.wikipedia.org/wiki/Special:Search/${encodeURIComponent(artist.name)}` : undefined,
-          bioExcerpt: artist?.tags?.map(tag => tag.name).join(', ') || 'Artist information coming soon...',
+          wikipediaUrl: wikipediaUrl || (artist?.id && artist.name ? `https://en.wikipedia.org/wiki/Special:Search/${encodeURIComponent(artist.name)}` : undefined),
+          bioExcerpt,
           relatedArtistIds: [],
           previousReleases: []
         },

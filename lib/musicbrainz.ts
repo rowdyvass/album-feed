@@ -67,9 +67,13 @@ export interface MusicBrainzArtist {
   'end-area'?: {
     name: string
   }
-  tags: Array<{
+  tags: Array<{ 
     name: string
     count: number
+  }>
+  relations?: Array<{ 
+    type: string
+    url: { resource: string }
   }>
 }
 
@@ -245,7 +249,7 @@ class MusicBrainzService {
    */
   async getArtist(artistId: string): Promise<MusicBrainzArtist> {
     const artist = await this.makeRequest(`/artist/${artistId}`, {
-      inc: 'tags+aliases'
+      inc: 'tags+aliases+url-rels'
     })
 
     return artist

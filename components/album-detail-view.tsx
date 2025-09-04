@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowLeft, ExternalLink, MapPin, Calendar, Users, Music, Ticket, Loader2 } from "lucide-react"
+import { ArrowLeft, ExternalLink, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { AlbumCard } from "@/components/album-card"
@@ -22,6 +22,7 @@ export function AlbumDetailView({ album }: AlbumDetailViewProps) {
 
   // Check if this is an AlbumDetail with full data
   const isFullAlbumDetail = 'recommendationBlurb' in album
+  const artist = 'artist' in album ? (album as AlbumDetail).artist : { bioExcerpt: '', wikipediaUrl: undefined }
   
   useEffect(() => {
     if (isFullAlbumDetail) {
@@ -114,18 +115,6 @@ export function AlbumDetailView({ album }: AlbumDetailViewProps) {
     "NME's Albums of the Year",
   ]
 
-  const artistInfo = {
-    hometown: "Brooklyn, NY",
-    yearsActive: "2018-present",
-    albumCount: 3,
-    onTour: true,
-    members: [
-      { name: "Alex Chen", role: "Vocals, Guitar" },
-      { name: "Sam Rodriguez", role: "Bass" },
-      { name: "Jordan Kim", role: "Drums" },
-    ],
-    labels: ["Indie Records", "Sub Pop (current)"],
-  }
 
   const discography: Album[] = [
     {
@@ -336,73 +325,19 @@ export function AlbumDetailView({ album }: AlbumDetailViewProps) {
         <section>
           <h2 className="text-3xl font-bold text-white mb-6">Artist Information</h2>
           <div className="bg-slate-800 rounded-lg p-6 border border-slate-700">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div className="flex items-center gap-3">
-                <MapPin className="w-5 h-5 text-amber-400" />
-                <div>
-                  <p className="text-slate-400 text-sm">Hometown</p>
-                  <p className="text-white font-medium">{artistInfo.hometown}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <Calendar className="w-5 h-5 text-amber-400" />
-                <div>
-                  <p className="text-slate-400 text-sm">Years Active</p>
-                  <p className="text-white font-medium">{artistInfo.yearsActive}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <Music className="w-5 h-5 text-amber-400" />
-                <div>
-                  <p className="text-slate-400 text-sm">Albums</p>
-                  <p className="text-white font-medium">{artistInfo.albumCount}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <Ticket className="w-5 h-5 text-amber-400" />
-                <div>
-                  <p className="text-slate-400 text-sm">Tour Status</p>
-                  <p className="text-white font-medium">
-                    {artistInfo.onTour ? (
-                      <a href="#" className="text-amber-400 hover:underline">
-                        Currently on tour
-                      </a>
-                    ) : (
-                      "Not touring"
-                    )}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 pt-6 border-t border-slate-700">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h3 className="text-white font-medium mb-3 flex items-center gap-2">
-                    <Users className="w-4 h-4 text-amber-400" />
-                    Members
-                  </h3>
-                  <div className="space-y-2">
-                    {artistInfo.members.map((member) => (
-                      <div key={member.name} className="flex justify-between">
-                        <span className="text-slate-300">{member.name}</span>
-                        <span className="text-slate-400 text-sm">{member.role}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-white font-medium mb-3">Record Labels</h3>
-                  <div className="space-y-1">
-                    {artistInfo.labels.map((label) => (
-                      <p key={label} className="text-slate-300">
-                        {label}
-                      </p>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
+            <p className="text-slate-300 leading-relaxed mb-4">
+              {artist.bioExcerpt}
+            </p>
+            {artist.wikipediaUrl && (
+              <a
+                href={artist.wikipediaUrl}
+                className="text-amber-400 hover:underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Read more on Wikipedia
+              </a>
+            )}
           </div>
         </section>
 
