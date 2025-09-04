@@ -38,7 +38,7 @@ export class MultiSourceScraperService {
     },
     STEREOGUM_HEAVY_ROTATION: {
       name: 'Stereogum Heavy Rotation',
-      url: 'https://www.stereogum.com/heavy-rotation/',
+      url: 'https://www.stereogum.com/heavy-rotation/2025/',
       type: 'stereogum'
     },
     AQUARIUM_DRUNKARD_TURNTABLE: {
@@ -324,31 +324,34 @@ export class MultiSourceScraperService {
       console.log(`[MultiSource] Stereogum HTML length: ${html.length} characters`)
       
       const releases: MultiSourceRelease[] = []
-      
-      // Try multiple patterns for Stereogum
+
+      // Stereogum Heavy Rotation posts typically list albums in <strong> or <em>
+      // tags using the pattern "Artist – Album". Extract those pairs.
       const patterns = [
-        /<h[1-6][^>]*>([^<]+)<\/h[1-6]>/g,
-        /<a[^>]*class="[^"]*title[^"]*"[^>]*>([^<]+)<\/a>/g,
-        /<span[^>]*class="[^"]*title[^"]*"[^>]*>([^<]+)<\/span>/g
+        /<strong>\s*([^<]+?)\s*[–-]\s*([^<]+?)\s*<\/strong>/g,
+        /<em>\s*([^<]+?)\s*[–-]\s*([^<]+?)\s*<\/em>/g
       ]
-      
+
+      const seen = new Set<string>()
       for (const pattern of patterns) {
         let match
         while ((match = pattern.exec(html)) !== null) {
-          const title = match[1].trim()
-          if (title && title.length > 3 && title.length < 100 && !title.includes('Stereogum')) {
+          const artist = match[1].trim()
+          const title = match[2].trim()
+          if (artist && title && !seen.has(`${artist}-${title}`.toLowerCase())) {
             releases.push({
               title,
-              artist: 'Unknown Artist',
+              artist,
               reviewDate: new Date().toISOString().split('T')[0],
               genre: 'Unknown',
               sources: [],
               sourceCount: 0
             })
+            seen.add(`${artist}-${title}`.toLowerCase())
           }
         }
       }
-      
+
       console.log(`[MultiSource] Stereogum found ${releases.length} potential releases`)
       return releases.slice(0, 20)
     } catch (error) {
