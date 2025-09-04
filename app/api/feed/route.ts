@@ -4,7 +4,6 @@ import { multiSourceScraperService } from '@/lib/multi-source-scraper'
 import { coverArtService } from '@/lib/cover-art-service'
 import { databaseService } from '@/lib/database'
 import { dataSyncService } from '@/lib/data-sync'
-// AllMusic albums data (inline to avoid webpack issues)
 
 import type { FeedResponse, FeedFilters } from '@/types'
 
@@ -75,49 +74,9 @@ export async function GET(request: NextRequest) {
     console.log(`[API] Found ${albums.length} albums from database`)
 
     // Add AllMusic albums to the mix
-    const allMusicAlbumsData = [
-      {
-        id: 'the-beths-straight-line-was-a-lie',
-        releaseGroupId: 'rg_the_beths_2025',
-        title: 'Straight Line Was a Lie',
-        primaryArtistId: 'artist_the_beths',
-        artistCredit: 'The Beths',
-        label: 'Anti-',
-        releaseDate: '2025-08-29',
-        regions: ['US'],
-        genres: ['Pop/Rock', 'Indie Rock'],
-        isReissue: false,
-        primaryType: 'Album',
-        coverUrl: '/indie-rock-album-cover.png',
-        weeklyScore: 85.0,
-        sourceTags: ['AllMusic'],
-        sourceCount: 1,
-        badges: []
-      },
-      {
-        id: 'blood-orange-essex-honey',
-        releaseGroupId: 'rg_blood_orange_2025',
-        title: 'Essex Honey',
-        primaryArtistId: 'artist_blood_orange',
-        artistCredit: 'Blood Orange',
-        label: 'RCA',
-        releaseDate: '2025-08-29',
-        regions: ['US', 'UK'],
-        genres: ['Pop/Rock', 'R&B', 'Alternative R&B'],
-        isReissue: false,
-        primaryType: 'Album',
-        coverUrl: '/pop-album-cover.png',
-        weeklyScore: 87.5,
-        sourceTags: ['AllMusic'],
-        sourceCount: 1,
-        badges: []
-      }
-    ]
+    const { allAllMusicAlbums2025 } = await import('@/lib/allmusic-albums-2025')
 
-    console.log(`[API] AllMusic albums data array length:`, allMusicAlbumsData.length)
-    console.log(`[API] AllMusic albums data array:`, JSON.stringify(allMusicAlbumsData, null, 2))
-
-    const allMusicAlbums = allMusicAlbumsData.map(album => ({
+    const allMusicAlbums = allAllMusicAlbums2025.map(album => ({
       id: album.id,
       releaseGroupId: album.releaseGroupId,
       title: album.title,
