@@ -19,6 +19,8 @@ export function AlbumCard({ album, selectedService }: AlbumCardProps) {
   const [imageError, setImageError] = useState(false)
   const [showServiceModal, setShowServiceModal] = useState(false)
   const [addingToService, setAddingToService] = useState<string | null>(null)
+  const [criticalConsensus, setCriticalConsensus] = useState<string>("")
+  const [isLoadingConsensus, setIsLoadingConsensus] = useState(false)
 
   const rating = (album.weeklyScore / 100) * 5
 
@@ -37,6 +39,32 @@ export function AlbumCard({ album, selectedService }: AlbumCardProps) {
   }
 
   const streamingServices = ["Spotify", "Apple Music", "YouTube Music", "Pandora", "Deezer", "Tidal"]
+
+  const fetchCriticalConsensus = async () => {
+    try {
+      setIsLoadingConsensus(true)
+      const response = await fetch(`/api/albums/${album.id}/consensus`)
+      if (response.ok) {
+        const data = await response.json()
+        const oneLine = (data.consensus || "").replace(/\s+/g, " ").trim()
+        setCriticalConsensus(oneLine.length > 120 ? oneLine.slice(0, 117) + "..." : oneLine)
+      } else {
+        setCriticalConsensus(getRecommendationBlurb(album))
+      }
+    } catch (error) {
+      console.error("[AlbumCard] Error fetching consensus:", error)
+      setCriticalConsensus(getRecommendationBlurb(album))
+    } finally {
+      setIsLoadingConsensus(false)
+    }
+  }
+
+  const handleMouseEnter = () => {
+    setIsHovered(true)
+    if (!criticalConsensus && !isLoadingConsensus) {
+      fetchCriticalConsensus()
+    }
+  }
 
   const handleAddAlbum = async (service?: string) => {
     if (selectedService && selectedService !== "Any streaming service") {
@@ -71,7 +99,7 @@ export function AlbumCard({ album, selectedService }: AlbumCardProps) {
     <>
       <div
         className="group cursor-pointer transition-all duration-300 hover:scale-105"
-        onMouseEnter={() => setIsHovered(true)}
+        onMouseEnter={handleMouseEnter}
         onMouseLeave={() => setIsHovered(false)}
       >
         <div className="relative aspect-square overflow-hidden rounded-lg bg-slate-800 border border-slate-700 shadow-lg album-card-hover group">
@@ -122,8 +150,8 @@ export function AlbumCard({ album, selectedService }: AlbumCardProps) {
             </div>
 
             <div className="flex-1 flex items-center justify-center px-4">
-              <p className="text-white text-sm text-center leading-relaxed font-medium italic">
-                "{getRecommendationBlurb(album)}"
+              <p className="text-white text-sm text-center leading-relaxed font-medium italic line-clamp-1">
+                "{criticalConsensus || (isLoadingConsensus ? 'Loading critical buzz...' : getRecommendationBlurb(album))}"
               </p>
             </div>
 
